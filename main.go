@@ -3,18 +3,18 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 )
 
 func main() {
-	http.HandleFunc("/", handleRequestAndRedirect)
-	fmt.Println("server running on : http://localhost:8080")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	proxy := httputil.NewSingleHostReverseProxy(&url.URL{
+		Scheme: "http",
+		Host:   "localhost:8000",
+	})
+
+	fmt.Println("server running on  http://localhost:9000")
+	if err := http.ListenAndServe(":9000", proxy); err != nil {
 		panic(err)
 	}
-
-}
-
-// Given a request send it to the appropriate url
-func handleRequestAndRedirect(res http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(res, "hello\n")
 }
