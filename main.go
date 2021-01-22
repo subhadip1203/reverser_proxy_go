@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"time"
 )
 
 var severCount = 0
@@ -31,10 +32,23 @@ func getProxyURL() string {
 func serveReverseProxy(target string, res http.ResponseWriter, req *http.Request) {
 	// parse the url
 	url, _ := url.Parse(target)
+
+	// read cookie named _ga
+	cookie, err := req.Cookie("_ga")
+	if err != nil {
+		fmt.Printf("Cant find cookie")
+		return
+	}
+	fmt.Println(cookie)
+
 	// create the reverse proxy
 	proxy := httputil.NewSingleHostReverseProxy(url)
 	// Note that ServeHttp is non blocking & uses a go routine under the hood
 	proxy.ServeHTTP(res, req)
+	go func() {
+		time.Sleep(5 * time.Second)
+		fmt.Println("ran after some time")
+	}()
 }
 
 // Given a request send it to the appropriate url
